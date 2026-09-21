@@ -113,8 +113,19 @@
                 document.getElementById("q-details").innerText = `CODE: ${stu.code} • ROOM: ${stu.room}`;
                 
                 // Fast & Stable QR API
-                let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${stu.code}&margin=1`;
-                document.getElementById("qr-code-img").src = qrUrl;
+                // ecc=H = High error correction (~30% recovery). This is required
+                // because we overlay a photo on top of the QR image — without
+                // high ECC the covered center area exceeds what a scanner can
+                // reconstruct, so the QR fails to read.
+                let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(stu.code)}&margin=1&ecc=H`;
+
+                const qrImg = document.getElementById("qr-code-img");
+                qrImg.onerror = () => {
+                    // If qrserver.com is unreachable, fall back to a second provider
+                    qrImg.onerror = null;
+                    qrImg.src = `https://chart.googleapis.com/chart?chs=350x350&cht=qr&chl=${encodeURIComponent(stu.code)}&choe=UTF-8&chld=H|1`;
+                };
+                qrImg.src = qrUrl;
                 document.getElementById("qr-center-img").src = stu.photo; 
             } else {
                 localStorage.removeItem("studentCode");
