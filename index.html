@@ -50,12 +50,21 @@
         .valid-date { font-size: 13px; font-weight: 700; background: var(--bg-color); display: inline-block; padding: 6px 15px; border-radius: 12px;}
 
         /* Live Attendance Section */
-        .attendance-card { background: var(--card-bg); border-radius: 20px; padding: 20px; }
+        .attendance-card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;}
         .attendance-card h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 800; color: var(--text-main); display: flex; justify-content: space-between;}
         .att-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #f9f9f9; border-radius: 12px; margin-bottom: 10px; font-weight: 600; border: 1px solid #f0f0f0;}
         .status { font-size: 12px; padding: 4px 10px; border-radius: 8px; font-weight: 800;}
         .st-done { background: rgba(52, 199, 89, 0.15); color: var(--success); }
         .st-pend { background: rgba(142, 142, 147, 0.15); color: #888; }
+
+        /* Monthly Record Section */
+        .month-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; }
+        .month-row:last-child { border-bottom: none; }
+        .m-date { font-weight: 700; font-size: 14px; color: var(--text-main); }
+        .m-meals { display: flex; gap: 15px; }
+        .m-icon { font-size: 18px; opacity: 0.2; filter: grayscale(100%); transition: 0.2s;}
+        .m-icon.active { opacity: 1; filter: grayscale(0%); }
+        .scroll-box { max-height: 250px; overflow-y: auto; background: #f9f9f9; border-radius: 16px; border: 1px solid #f0f0f0;}
 
         /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 10px 0 25px 0; z-index: 100; align-items: center;}
@@ -96,12 +105,20 @@
             <div class="valid-date" id="h-date">Valid Till: --</div>
         </div>
 
-        <!-- LIVE ATTENDANCE -->
+        <!-- LIVE ATTENDANCE (TODAY) -->
         <div class="attendance-card">
             <h3>Today's Activity <span style="color:var(--primary); font-size:12px;" id="today-date-text"></span></h3>
             <div class="att-row"><span>🌅 Breakfast</span> <span id="att-b" class="status st-pend">Pending</span></div>
             <div class="att-row"><span>☀️ Lunch</span> <span id="att-l" class="status st-pend">Pending</span></div>
             <div class="att-row"><span>🌙 Dinner</span> <span id="att-d" class="status st-pend">Pending</span></div>
+        </div>
+
+        <!-- MONTHLY RECORD -->
+        <div class="attendance-card">
+            <h3 id="month-title">This Month's Record</h3>
+            <div class="scroll-box" id="monthly-list">
+                <p style="text-align:center; padding:20px; color:#888; font-size:13px; margin:0;">Loading records...</p>
+            </div>
         </div>
     </div>
 
@@ -116,8 +133,12 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let now = new Date();
+    document.getElementById('month-title').innerText = `${monthNames[now.getMonth()]} Record`;
+    document.getElementById('today-date-text').innerText = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
     window.onload = () => {
-        document.getElementById('today-date-text').innerText = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
         let code = localStorage.getItem("studentCode");
         if(code) { fetchStudentData(code); } 
         else { 
@@ -162,19 +183,65 @@
             document.getElementById("loader").style.display = "none"; document.getElementById("app-screen").style.display = "block";
         });
 
-        // 2. Get Live Attendance
+        // 2. Get Full Month & Live Attendance
         let todayStr = new Date().toISOString().split('T')[0];
-        db.collection("attendance").where("code", "==", code).where("date", "==", todayStr).onSnapshot((snap) => {
-            // Reset to pending first
+        let currentMonthStr = todayStr.substring(0, 7); // Format: YYYY-MM
+
+        db.collection("attendance").where("code", "==", code).onSnapshot((snap) => {
+            // Reset Today to pending
             document.getElementById("att-b").className = "status st-pend"; document.getElementById("att-b").innerText = "Pending";
             document.getElementById("att-l").className = "status st-pend"; document.getElementById("att-l").innerText = "Pending";
             document.getElementById("att-d").className = "status st-pend"; document.getElementById("att-d").innerText = "Pending";
             
+            let monthlyData = {};
+
             snap.forEach(doc => {
-                let m = doc.data().meal.toLowerCase();
-                let el = document.getElementById("att-" + m.charAt(0));
-                if(el) { el.className = "status st-done"; el.innerText = "✔ Eaten"; }
+                let data = doc.data();
+                let dStr = data.date;
+
+                // Mark Today's Activity
+                if(dStr === todayStr) {
+                    let m = data.meal.toLowerCase();
+                    let el = document.getElementById("att-" + m.charAt(0));
+                    if(el) { el.className = "status st-done"; el.innerText = "✔ Eaten"; }
+                }
+
+                // Collect Current Month's Data
+                if(dStr.startsWith(currentMonthStr)) {
+                    if(!monthlyData[dStr]) monthlyData[dStr] = {b:false, l:false, d:false};
+                    let m = data.meal.toLowerCase();
+                    if(m === 'breakfast') monthlyData[dStr].b = true;
+                    if(m === 'lunch') monthlyData[dStr].l = true;
+                    if(m === 'dinner') monthlyData[dStr].d = true;
+                }
             });
+
+            // Generate Monthly List HTML
+            let listHTML = "";
+            let sortedDates = Object.keys(monthlyData).sort().reverse(); // Newest first
+
+            if(sortedDates.length === 0) {
+                listHTML = "<p style='text-align:center; padding:20px; color:#888; font-size:13px; margin:0;'>No meals eaten this month yet.</p>";
+            } else {
+                sortedDates.forEach(d => {
+                    let parts = d.split('-');
+                    let dateObj = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+                    let dayNum = parts[2];
+                    let dayName = dateObj.toLocaleDateString('en-US', {weekday:'short'});
+                    let st = monthlyData[d];
+
+                    listHTML += `
+                    <div class="month-row">
+                        <div class="m-date">${dayNum} ${dayName}</div>
+                        <div class="m-meals">
+                            <span class="m-icon ${st.b ? 'active' : ''}">🌅</span>
+                            <span class="m-icon ${st.l ? 'active' : ''}">☀️</span>
+                            <span class="m-icon ${st.d ? 'active' : ''}">🌙</span>
+                        </div>
+                    </div>`;
+                });
+            }
+            document.getElementById("monthly-list").innerHTML = listHTML;
         });
     }
 </script>
