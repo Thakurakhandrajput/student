@@ -3,359 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OBC Mess - Student Portal</title>
+    <title>OBC Mess - My Dashboard</title>
     
-    <!-- 🔥 PWA & PREMIUM META TAGS 🔥 -->
+    <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007AFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="OBC Mess">
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    
     <style>
-        /* ================= PREMIUM BASE STYLES ================= */
-        :root { --bg-color: #f4f6f9; --card-bg: #ffffff; --text-main: #1d1d1f; --text-muted: #86868b; --primary: #007AFF; --success: #34C759; --danger: #FF3B30; --warning: #FF9500; }
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root { --bg-color: #f4f6f9; --card-bg: #ffffff; --text-main: #1d1d1f; --primary: #007AFF; --success: #34C759; --danger: #FF3B30; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent;}
         body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; padding-bottom: 90px; }
 
-        /* ================= LOADER & LOGIN ================= */
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        /* Loader & Login */
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:9999; display:flex; justify-content:center; align-items:center;}
         .spinner { border: 4px solid rgba(0, 122, 255, 0.2); border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        .login-card { background: var(--card-bg); padding: 40px 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); width: 100%; max-width: 350px; }
-        .login-card h1 { margin: 0 0 5px 0; font-size: 28px; font-weight: 800; color: var(--primary); }
-        .login-card p { margin: 0 0 25px 0; font-size: 14px; color: var(--text-muted); font-weight: 600; }
-        .login-input { width: 100%; background: var(--bg-color); border: 2px solid transparent; padding: 18px; border-radius: 16px; font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 20px; outline: none; transition: 0.2s; letter-spacing: 2px;}
+        #login-screen { display:none; padding: 20px; text-align: center; height: 100vh; flex-direction: column; justify-content: center; align-items: center;}
+        .login-card { background: var(--card-bg); padding: 40px 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 350px; }
+        .login-input { width: 100%; background: var(--bg-color); border: 2px solid transparent; padding: 18px; border-radius: 16px; font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 20px; outline: none;}
         .login-input:focus { border-color: var(--primary); background: #fff; }
-        .btn-main { width: 100%; background: var(--primary); color: #fff; border: none; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 8px 20px rgba(0,122,255,0.25);}
-        .btn-main:active { transform: scale(0.97); }
+        .btn-main { width: 100%; background: var(--primary); color: #fff; border: none; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer;}
 
-        /* ================= APP LAYOUT ================= */
-        #app-screen { display: none; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
+        /* Header */
         .header { padding: 30px 20px 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { margin: 0; font-size: 26px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;}
+        .header h1 { margin: 0; font-size: 26px; font-weight: 800; }
         .btn-logout { background: rgba(255,59,48,0.1); color: var(--danger); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; }
 
-        .tab-content { display: none; padding: 0 20px; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-
-        /* ================= HOME TAB ================= */
+        /* Main Content */
+        #app-screen { display: none; padding: 0 20px;}
+        
         .profile-card { background: linear-gradient(135deg, #1c1c1e, #2c2c2e); border-radius: 24px; padding: 25px; color: #fff; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);}
-        .profile-img { width: 90px; height: 90px; border-radius: 25px; border: 3px solid rgba(255,255,255,0.2); margin-bottom: 15px; object-fit: cover; }
+        .profile-img { width: 90px; height: 90px; border-radius: 25px; border: 3px solid rgba(255,255,255,0.2); margin-bottom: 10px; object-fit: cover; }
         .profile-card h2 { margin: 0; font-size: 22px; font-weight: 800; }
         .profile-card p { margin: 5px 0 0 0; font-size: 13px; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;}
         
-        .validity-card { background: var(--card-bg); border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); margin-bottom: 20px;}
-        .validity-card h3 { margin: 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;}
+        .validity-card { background: var(--card-bg); border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 20px;}
+        .validity-card h3 { margin: 0; font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 1px;}
         .days-big { font-size: 42px; font-weight: 800; margin: 5px 0; color: var(--success); }
         .days-big.red { color: var(--danger); }
-        .valid-date { font-size: 13px; font-weight: 700; color: var(--text-main); background: var(--bg-color); display: inline-block; padding: 6px 15px; border-radius: 12px; margin-top: 5px;}
+        .valid-date { font-size: 13px; font-weight: 700; background: var(--bg-color); display: inline-block; padding: 6px 15px; border-radius: 12px;}
 
-        /* ================= QR TAB ================= */
-        .qr-header-card { background: var(--card-bg); border-radius: 20px; padding: 15px; display: flex; align-items: center; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.03);}
-        .qr-small-img { width: 50px; height: 50px; border-radius: 14px; margin-right: 15px; object-fit: cover; border: 2px solid var(--primary); }
-        .qr-info h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--text-main);}
-        .qr-info p { margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted); font-weight: 700;}
-        
-        .qr-container { background: #fff; padding: 30px; border-radius: 35px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); text-align: center; position: relative; width: fit-content; margin: 0 auto; border: 1px solid rgba(0,0,0,0.04);}
-        .qr-wrapper { position: relative; width: 220px; height: 220px; margin: 0 auto; }
-        .qr-image { width: 100%; height: 100%; border-radius: 10px; }
-        
-        /* 🔥 THE MAGIC: CENTER PHOTO OVERLAY ON QR */
-        .qr-center-photo { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 55px; height: 55px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); object-fit: cover;}
-        
-        .scan-text { margin-top: 20px; font-size: 13px; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;}
+        /* Live Attendance Section */
+        .attendance-card { background: var(--card-bg); border-radius: 20px; padding: 20px; }
+        .attendance-card h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 800; color: var(--text-main); display: flex; justify-content: space-between;}
+        .att-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #f9f9f9; border-radius: 12px; margin-bottom: 10px; font-weight: 600; border: 1px solid #f0f0f0;}
+        .status { font-size: 12px; padding: 4px 10px; border-radius: 8px; font-weight: 800;}
+        .st-done { background: rgba(52, 199, 89, 0.15); color: var(--success); }
+        .st-pend { background: rgba(142, 142, 147, 0.15); color: #888; }
 
-        /* ================= MENU TAB ================= */
-        .today-menu-card { background: linear-gradient(135deg, var(--primary), #005bb5); border-radius: 24px; padding: 25px; color: #fff; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,122,255,0.3);}
-        .today-menu-card h3 { margin: 0 0 15px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.8); font-weight: 800;}
-        .today-menu-card h2 { margin: 0 0 15px 0; font-size: 26px; font-weight: 800;}
-        .meal-row-today { display: flex; background: rgba(255,255,255,0.15); padding: 12px 15px; border-radius: 14px; margin-bottom: 10px; align-items: center; border: 1px solid rgba(255,255,255,0.1);}
-        .meal-row-today span { font-size: 20px; margin-right: 12px; }
-        .meal-row-today p { margin: 0; font-size: 15px; font-weight: 700; }
-
-        .weekly-title { font-size: 13px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;}
-        .week-card { background: var(--card-bg); border-radius: 18px; padding: 15px 20px; margin-bottom: 12px; display: flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02);}
-        .day-badge { background: var(--bg-color); color: var(--primary); font-weight: 800; font-size: 11px; padding: 6px 12px; border-radius: 10px; width: 60px; text-align: center; margin-right: 15px; text-transform: uppercase;}
-        .week-details p { margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: var(--text-main);}
-        .week-details p:last-child { margin: 0; }
-        .week-details span { font-size: 13px; margin-right: 5px; opacity: 0.8;}
-
-        /* ================= BOTTOM NAV ================= */
+        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 10px 0 25px 0; z-index: 100; align-items: center;}
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 60px;}
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 10px; font-weight: 700; cursor: pointer; text-decoration: none;}
         .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 24px; margin-bottom: 4px; transition: 0.2s; }
-        
-        /* 🔥 CENTER QR BUTTON STYLE */
+        .nav-icon { font-size: 24px; margin-bottom: 4px; }
         .nav-item.center-qr .nav-icon { background: var(--text-main); color: #fff; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; border-radius: 20px; font-size: 26px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transform: translateY(-10px);}
-        .nav-item.center-qr.active .nav-icon { background: var(--primary); box-shadow: 0 8px 20px rgba(0,122,255,0.3);}
-        .nav-item:active .nav-icon { transform: scale(0.9); }
-        .nav-item.center-qr:active .nav-icon { transform: translateY(-10px) scale(0.9); }
     </style>
 </head>
 <body>
 
-    <!-- LOADER -->
     <div id="loader"><div class="spinner"></div></div>
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" style="display:none;">
+    <div id="login-screen">
         <div class="login-card">
-            <h1>Student Login</h1>
-            <p>Enter your Mess ID Code</p>
-            <input type="text" id="login-code" class="login-input" placeholder="e.g. 101" autocomplete="off">
-            <button class="btn-main" id="btn-login" onclick="verifyLogin()">Access My Portal</button>
+            <h1 style="color:var(--primary); margin:0 0 5px 0;">Student Portal</h1>
+            <p style="color:#888; font-weight:600; margin:0 0 25px 0; font-size:14px;">Enter your Mess ID Code</p>
+            <input type="text" id="login-code" class="login-input" placeholder="101" autocomplete="off">
+            <button class="btn-main" id="btn-login" onclick="verifyLogin()">Login Securely</button>
         </div>
     </div>
 
-    <!-- MAIN APP SCREEN -->
     <div id="app-screen">
         <div class="header">
-            <h1 id="header-title">My Dashboard</h1>
+            <h1>My Dashboard</h1>
             <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
 
-        <!-- 1. HOME TAB -->
-        <div id="tab-home" class="tab-content">
-            <div class="profile-card">
-                <img id="h-photo" src="" class="profile-img">
-                <h2 id="h-name">Loading...</h2>
-                <p id="h-details">Room: -- | Code: --</p>
-            </div>
-            
-            <div class="validity-card">
-                <h3>Mess Validity Left</h3>
-                <div id="h-days" class="days-big">0</div>
-                <div class="valid-date" id="h-date">Valid Till: --</div>
-            </div>
+        <div class="profile-card">
+            <img id="h-photo" src="" class="profile-img">
+            <h2 id="h-name">Loading...</h2>
+            <p id="h-details">Room: -- | Code: --</p>
+        </div>
+        
+        <div class="validity-card">
+            <h3>Mess Validity Left</h3>
+            <div id="h-days" class="days-big">0</div>
+            <div class="valid-date" id="h-date">Valid Till: --</div>
         </div>
 
-        <!-- 2. SMART QR TAB -->
-        <div id="tab-qr" class="tab-content">
-            <div class="qr-header-card">
-                <img id="q-photo" src="" class="qr-small-img">
-                <div class="qr-info">
-                    <h3 id="q-name">Student Name</h3>
-                    <p id="q-details">Code: 101 • Room: A1</p>
-                </div>
-            </div>
-            
-            <div class="qr-container">
-                <div class="qr-wrapper">
-                    <!-- 🔥 NEW FAST QR API 🔥 -->
-                    <img id="qr-code-img" src="" class="qr-image" alt="QR Code">
-                    <!-- Overlaid Profile Photo -->
-                    <img id="qr-center-img" src="" class="qr-center-photo">
-                </div>
-                <div class="scan-text">Scan at Gate Terminal</div>
-            </div>
-        </div>
-
-        <!-- 3. MENU TAB -->
-        <div id="tab-menu" class="tab-content">
-            <div class="today-menu-card">
-                <h3>🍽️ Today's Special</h3>
-                <h2 id="menu-today-title">Loading...</h2>
-                <div class="meal-row-today"><span>🌅</span><p id="m-today-b">...</p></div>
-                <div class="meal-row-today"><span>☀️</span><p id="m-today-l">...</p></div>
-                <div class="meal-row-today"><span>🌙</span><p id="m-today-d">...</p></div>
-            </div>
-
-            <div class="weekly-title">Full Week Menu</div>
-            <div id="weekly-menu-container">
-                <!-- JavaScript will generate week cards here -->
-            </div>
-        </div>
-
-        <!-- BOTTOM NAVIGATION -->
-        <div class="bottom-nav">
-            <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
-                <div class="nav-icon">🏠</div><span>Home</span>
-            </div>
-            <div class="nav-item center-qr" id="nav-qr" onclick="switchTab('qr')">
-                <div class="nav-icon">📱</div><span style="margin-top:2px;">Scan QR</span>
-            </div>
-            <div class="nav-item" id="nav-menu" onclick="switchTab('menu')">
-                <div class="nav-icon">🍽️</div><span>Menu</span>
-            </div>
+        <!-- LIVE ATTENDANCE -->
+        <div class="attendance-card">
+            <h3>Today's Activity <span style="color:var(--primary); font-size:12px;" id="today-date-text"></span></h3>
+            <div class="att-row"><span>🌅 Breakfast</span> <span id="att-b" class="status st-pend">Pending</span></div>
+            <div class="att-row"><span>☀️ Lunch</span> <span id="att-l" class="status st-pend">Pending</span></div>
+            <div class="att-row"><span>🌙 Dinner</span> <span id="att-d" class="status st-pend">Pending</span></div>
         </div>
     </div>
 
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item active"><div class="nav-icon">🏠</div><span>Home</span></a>
+        <a href="qr.html" class="nav-item center-qr"><div class="nav-icon">📱</div><span style="margin-top:2px;">Scan QR</span></a>
+        <a href="meal.html" class="nav-item"><div class="nav-icon">🍽️</div><span>Menu</span></a>
+    </div>
+
 <script>
-    // Firebase Config (Same as Admin)
     const firebaseConfig = { apiKey: "AIzaSyAA2P2IM5aPzJj10XMGLn_9BMSJhKeMGiE", authDomain: "obc-mess-system.firebaseapp.com", projectId: "obc-mess-system", storageBucket: "obc-mess-system.firebasestorage.app", messagingSenderId: "501219370424", appId: "1:501219370424:web:1dddaefc10e8bd21efdb4d" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // --- HARDCODED WEEKLY MENU (Admin can change this in JS for now) ---
-    const weeklyMenu = [
-        { day: "Sun", title: "Sunday Feast", b: "Aloo Paratha & Curd", l: "Rajma Chawal & Salad", d: "Paneer Butter Masala & Roti" },
-        { day: "Mon", title: "Monday Regular", b: "Poha & Jalebi", l: "Dal Tadka, Rice, Roti, Sabzi", d: "Mix Veg & Roti" },
-        { day: "Tue", title: "Tuesday Special", b: "Idli Sambar", l: "Chole Bhature", d: "Egg Curry / Malai Kofta" },
-        { day: "Wed", title: "Mid-Week Diet", b: "Sandwich & Tea", l: "Kadhi Pakora & Rice", d: "Aloo Gobi & Roti" },
-        { day: "Thu", title: "Thursday Meal", b: "Upma & Chutney", l: "Dal Makhani, Rice, Roti", d: "Bhindi Masala & Roti" },
-        { day: "Fri", title: "Friday Lite", b: "Puri Sabzi", l: "Veg Biryani & Raita", d: "Soyabean Curry & Roti" },
-        { day: "Sat", title: "Weekend Prep", b: "Bread Pakora", l: "Jeera Aloo, Dal, Rice", d: "Khichdi & Papad" }
-    ];
-
-    let currentStudent = null;
-
-    // --- INITIALIZATION ---
     window.onload = () => {
-        let savedCode = localStorage.getItem("studentCode");
-        if(savedCode) { fetchStudentData(savedCode); } 
+        document.getElementById('today-date-text').innerText = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+        let code = localStorage.getItem("studentCode");
+        if(code) { fetchStudentData(code); } 
         else { 
             document.getElementById("loader").style.display = "none";
             document.getElementById("login-screen").style.display = "flex"; 
         }
-        setupMenu();
     }
 
-    // --- LOGIN LOGIC ---
     async function verifyLogin() {
         let code = document.getElementById("login-code").value.trim();
         if(!code) return alert("Please enter your code");
-        
-        let btn = document.getElementById("btn-login");
-        btn.innerText = "⏳ Checking..."; btn.disabled = true;
-
+        let btn = document.getElementById("btn-login"); btn.innerText = "⏳ Checking..."; btn.disabled = true;
         try {
             let doc = await db.collection("students").doc(code).get();
-            if(doc.exists) {
-                localStorage.setItem("studentCode", code);
-                fetchStudentData(code);
-            } else {
-                alert("❌ Invalid Code. Student not found!");
-                btn.innerText = "Access My Portal"; btn.disabled = false;
-            }
-        } catch(e) {
-            alert("Error: " + e.message);
-            btn.innerText = "Access My Portal"; btn.disabled = false;
-        }
+            if(doc.exists) { localStorage.setItem("studentCode", code); fetchStudentData(code); } 
+            else { alert("❌ Invalid Code!"); btn.innerText = "Login Securely"; btn.disabled = false; }
+        } catch(e) { alert("Error: " + e.message); btn.innerText = "Login Securely"; btn.disabled = false; }
     }
 
-    function logout() {
-        if(confirm("Log out of your portal?")) {
-            localStorage.removeItem("studentCode");
-            window.location.reload();
-        }
-    }
+    function logout() { if(confirm("Log out?")) { localStorage.removeItem("studentCode"); window.location.reload(); } }
 
-    // --- FETCH & POPULATE DATA ---
-    async function fetchStudentData(code) {
-        document.getElementById("login-screen").style.display = "none";
-        document.getElementById("loader").style.display = "flex";
-
+    function fetchStudentData(code) {
+        document.getElementById("login-screen").style.display = "none"; document.getElementById("loader").style.display = "flex";
+        
+        // 1. Get Details
         db.collection("students").doc(code).onSnapshot((doc) => {
             if(!doc.exists) { logout(); return; }
-            currentStudent = doc.data();
-            populateUI(currentStudent);
+            let stu = doc.data();
+            document.getElementById("h-photo").src = stu.photo; document.getElementById("h-name").innerText = stu.name;
+            document.getElementById("h-details").innerText = `Room: ${stu.room} | Code: ${stu.code}`;
             
-            document.getElementById("loader").style.display = "none";
-            document.getElementById("app-screen").style.display = "block";
-            switchTab('home'); // Default tab
-        });
-    }
-
-    function populateUI(stu) {
-        // Calculate Days
-        let today = new Date(); today.setHours(0,0,0,0);
-        let target = new Date(stu.feeValidTill);
-        let daysLeft = Math.ceil((target - target.getTimezoneOffset()*60000 - today) / (1000 * 60 * 60 * 24));
-        
-        // 1. HOME TAB
-        document.getElementById("h-photo").src = stu.photo;
-        document.getElementById("h-name").innerText = stu.name;
-        document.getElementById("h-details").innerText = `Room: ${stu.room} | Code: ${stu.code}`;
-        
-        let daysEl = document.getElementById("h-days");
-        if(stu.status === 'paused') {
-            daysEl.innerText = "PAUSED"; daysEl.className = "days-big"; daysEl.style.fontSize = "32px";
-        } else if(daysLeft < 0) {
-            daysEl.innerText = "EXPIRED"; daysEl.className = "days-big red"; daysEl.style.fontSize = "32px";
-        } else {
-            daysEl.innerText = daysLeft + " Days"; daysEl.className = "days-big";
-        }
-        
-        let vDate = new Date(stu.feeValidTill).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-        document.getElementById("h-date").innerText = `Valid Till: ${vDate}`;
-
-        // 2. QR TAB
-        document.getElementById("q-photo").src = stu.photo;
-        document.getElementById("q-name").innerText = stu.name;
-        document.getElementById("q-details").innerText = `Code: ${stu.code} • Room: ${stu.room}`;
-        
-        // 🔥 NEW RELIABLE QR API
-        let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${stu.code}&margin=1`;
-        document.getElementById("qr-code-img").src = qrUrl;
-        document.getElementById("qr-center-img").src = stu.photo; 
-    }
-
-    // --- MENU SETUP ---
-    function setupMenu() {
-        let todayIndex = new Date().getDay(); // 0 (Sun) to 6 (Sat)
-        let todayMenu = weeklyMenu[todayIndex];
-
-        // Populate Today's Card
-        document.getElementById("menu-today-title").innerText = todayMenu.title;
-        document.getElementById("m-today-b").innerText = todayMenu.b;
-        document.getElementById("m-today-l").innerText = todayMenu.l;
-        document.getElementById("m-today-d").innerText = todayMenu.d;
-
-        // Populate Weekly List
-        let container = document.getElementById("weekly-menu-container");
-        container.innerHTML = "";
-        
-        weeklyMenu.forEach((m, index) => {
-            if(index === todayIndex) return; // Skip today in the list
+            let today = new Date(); today.setHours(0,0,0,0); let target = new Date(stu.feeValidTill);
+            let daysLeft = Math.ceil((target - target.getTimezoneOffset()*60000 - today) / (1000 * 60 * 60 * 24));
             
-            container.innerHTML += `
-                <div class="week-card">
-                    <div class="day-badge">${m.day}</div>
-                    <div class="week-details">
-                        <p><span>🌅</span> ${m.b}</p>
-                        <p><span>☀️</span> ${m.l}</p>
-                        <p><span>🌙</span> ${m.d}</p>
-                    </div>
-                </div>
-            `;
+            let daysEl = document.getElementById("h-days");
+            if(stu.status === 'paused') { daysEl.innerText = "PAUSED"; daysEl.className = "days-big"; } 
+            else if(daysLeft < 0) { daysEl.innerText = "EXPIRED"; daysEl.className = "days-big red"; } 
+            else { daysEl.innerText = daysLeft + " Days"; daysEl.className = "days-big"; }
+            
+            document.getElementById("h-date").innerText = `Valid Till: ${new Date(stu.feeValidTill).toLocaleDateString('en-US', {day: 'numeric', month: 'short', year:'numeric'})}`;
+            
+            document.getElementById("loader").style.display = "none"; document.getElementById("app-screen").style.display = "block";
         });
-    }
 
-    // --- TAB SWITCHER LOGIC ---
-    function switchTab(tabId) {
-        // Hide all tabs
-        document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
-        document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
-        
-        // Show selected
-        document.getElementById("tab-" + tabId).classList.add("active");
-        document.getElementById("nav-" + tabId).classList.add("active");
-
-        // Change Header Title
-        let titles = { 'home': 'My Dashboard', 'qr': 'My Smart ID', 'menu': 'Mess Menu' };
-        document.getElementById("header-title").innerText = titles[tabId];
+        // 2. Get Live Attendance
+        let todayStr = new Date().toISOString().split('T')[0];
+        db.collection("attendance").where("code", "==", code).where("date", "==", todayStr).onSnapshot((snap) => {
+            // Reset to pending first
+            document.getElementById("att-b").className = "status st-pend"; document.getElementById("att-b").innerText = "Pending";
+            document.getElementById("att-l").className = "status st-pend"; document.getElementById("att-l").innerText = "Pending";
+            document.getElementById("att-d").className = "status st-pend"; document.getElementById("att-d").innerText = "Pending";
+            
+            snap.forEach(doc => {
+                let m = doc.data().meal.toLowerCase();
+                let el = document.getElementById("att-" + m.charAt(0));
+                if(el) { el.className = "status st-done"; el.innerText = "✔ Eaten"; }
+            });
+        });
     }
 </script>
 
-<!-- 🔥 REGISTER SERVICE WORKER (For PWA Install) 🔥 -->
+<!-- SERVICE WORKER REGISTRATION FOR APP INSTALL -->
 <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('Premium Student PWA Active!'))
-            .catch(err => console.log('PWA Setup Failed', err));
-        });
-    }
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }
 </script>
 </body>
 </html>
