@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OBC Mess - My Smart ID</title>
+    
+    <!-- PWA Setup -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f4f6f9">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        :root { --bg-color: #f4f6f9; --card-bg: #ffffff; --text-main: #1d1d1f; --primary: #007AFF; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent;}
+        body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; padding-bottom: 90px; }
+
+        .header { padding: 30px 20px 15px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 26px; font-weight: 800; }
+
+        /* VIP ID Card Design */
+        .id-card-container { margin: 0 20px; background: var(--card-bg); border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.06); padding: 30px 20px; text-align: center; border: 1px solid rgba(0,0,0,0.04); position: relative; overflow: hidden;}
+        
+        /* Top Student Info */
+        .student-info { display: flex; align-items: center; justify-content: center; margin-bottom: 25px; border-bottom: 2px dashed #f0f0f0; padding-bottom: 20px;}
+        .small-photo { width: 50px; height: 50px; border-radius: 15px; margin-right: 15px; border: 2px solid var(--primary); object-fit: cover;}
+        .info-text { text-align: left; }
+        .info-text h3 { margin: 0; font-size: 18px; font-weight: 800; color: var(--text-main); }
+        .info-text p { margin: 2px 0 0 0; font-size: 13px; color: #888; font-weight: 700; text-transform: uppercase;}
+
+        /* BIG QR Section */
+        .qr-box { position: relative; width: 260px; height: 260px; margin: 0 auto; background: #fff; border-radius: 15px; padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);}
+        .qr-image { width: 100%; height: 100%; object-fit: contain; }
+        
+        /* Magic Overlay Photo */
+        .qr-center-photo { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.15); object-fit: cover; background: #fff;}
+
+        .scan-msg { margin-top: 25px; font-size: 14px; font-weight: 800; color: #aaa; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 10px 0 25px 0; z-index: 100; align-items: center;}
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 10px; font-weight: 700; cursor: pointer; text-decoration: none;}
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 24px; margin-bottom: 4px; }
+        .nav-item.center-qr .nav-icon { background: var(--primary); color: #fff; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; border-radius: 20px; font-size: 26px; box-shadow: 0 8px 20px rgba(0,122,255,0.3); transform: translateY(-10px);}
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>My Smart ID</h1>
+    </div>
+
+    <div class="id-card-container">
+        <div class="student-info">
+            <img id="q-photo" src="" class="small-photo">
+            <div class="info-text">
+                <h3 id="q-name">Loading...</h3>
+                <p id="q-details">Code: -- | Room: --</p>
+            </div>
+        </div>
+
+        <div class="qr-box">
+            <img id="qr-code-img" src="" class="qr-image" alt="QR Code">
+            <img id="qr-center-img" src="" class="qr-center-photo">
+        </div>
+
+        <div class="scan-msg">SCAN AT GATE TERMINAL</div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item"><div class="nav-icon">🏠</div><span>Home</span></a>
+        <a href="qr.html" class="nav-item active center-qr"><div class="nav-icon">📱</div><span style="margin-top:2px; color:var(--primary);">Scan QR</span></a>
+        <a href="meal.html" class="nav-item"><div class="nav-icon">🍽️</div><span>Menu</span></a>
+    </div>
+
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyAA2P2IM5aPzJj10XMGLn_9BMSJhKeMGiE", authDomain: "obc-mess-system.firebaseapp.com", projectId: "obc-mess-system", storageBucket: "obc-mess-system.firebasestorage.app", messagingSenderId: "501219370424", appId: "1:501219370424:web:1dddaefc10e8bd21efdb4d" };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    window.onload = () => {
+        let code = localStorage.getItem("studentCode");
+        if(!code) { window.location.replace("index.html"); } 
+        else { fetchQRData(code); }
+    }
+
+    function fetchQRData(code) {
+        db.collection("students").doc(code).get().then((doc) => {
+            if(doc.exists) {
+                let stu = doc.data();
+                document.getElementById("q-photo").src = stu.photo;
+                document.getElementById("q-name").innerText = stu.name;
+                document.getElementById("q-details").innerText = `Code: ${stu.code} • Room: ${stu.room}`;
+                
+                // Fast & Stable QR API
+                let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${stu.code}&margin=1`;
+                document.getElementById("qr-code-img").src = qrUrl;
+                document.getElementById("qr-center-img").src = stu.photo; 
+            } else {
+                localStorage.removeItem("studentCode");
+                window.location.replace("index.html");
+            }
+        });
+    }
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }
+</script>
+</body>
+</html>
