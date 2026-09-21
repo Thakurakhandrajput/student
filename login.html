@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OBC Mess - Student Login</title>
+    
+    <!-- PWA Setup -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="OBC Mess">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        :root { --bg-color: #f4f6f9; --card-bg: #ffffff; --text-main: #1d1d1f; --text-muted: #86868b; --primary: #007AFF; --success: #34C759; --danger: #FF3B30; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent;}
+        body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+        /* Loader */
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:9999; display:flex; justify-content:center; align-items:center;}
+        .spinner { border: 4px solid rgba(0, 122, 255, 0.2); border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .login-card { background: var(--card-bg); padding: 40px 25px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.06); width: 100%; max-width: 350px; text-align: center; border: 1px solid rgba(0,0,0,0.03); margin: 20px;}
+        .login-card h1 { margin: 0 0 5px 0; font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px;}
+        .login-card p { margin: 0 0 25px 0; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+        
+        .input-group { margin-bottom: 18px; text-align: left; }
+        .input-group label { display: block; font-size: 11px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;}
+        
+        .login-input { width: 100%; background: var(--bg-color); border: 2px solid transparent; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; outline: none; transition: 0.2s; color: var(--text-main);}
+        .login-input:focus { border-color: var(--primary); background: #fff; }
+        
+        .btn-main { width: 100%; background: var(--primary); color: #fff; border: none; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 8px 20px rgba(0,122,255,0.25); margin-top: 10px;}
+        .btn-main:active { transform: scale(0.97); box-shadow: 0 4px 10px rgba(0,122,255,0.15);}
+        .btn-main:disabled { background: #a1c9f7; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div id="loader"><div class="spinner"></div></div>
+
+    <div class="login-card" id="login-box" style="display:none;">
+        <h1>Student Portal</h1>
+        <p>OBC Mess Management System</p>
+        
+        <div class="input-group">
+            <label>Mess Code (ID)</label>
+            <input type="number" id="login-code" class="login-input" placeholder="e.g. 101" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="login-pass" class="login-input" placeholder="Enter your password" autocomplete="off">
+        </div>
+
+        <button class="btn-main" id="btn-login" onclick="verifyLogin()">Secure Login</button>
+    </div>
+
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyAA2P2IM5aPzJj10XMGLn_9BMSJhKeMGiE", authDomain: "obc-mess-system.firebaseapp.com", projectId: "obc-mess-system", storageBucket: "obc-mess-system.firebasestorage.app", messagingSenderId: "501219370424", appId: "1:501219370424:web:1dddaefc10e8bd21efdb4d" };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    window.onload = () => {
+        let savedCode = localStorage.getItem("studentCode");
+        if(savedCode) {
+            // Agar pehle se logged in hai, toh seedha index.html par bhej do
+            window.location.replace("index.html");
+        } else {
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("login-box").style.display = "block";
+        }
+    }
+
+    async function verifyLogin() {
+        let code = document.getElementById("login-code").value.trim();
+        let pass = document.getElementById("login-pass").value.trim();
+        
+        if(!code || !pass) {
+            return alert("⚠️ Please enter both Code and Password.");
+        }
+        
+        let btn = document.getElementById("btn-login");
+        btn.innerText = "⏳ Verifying..."; btn.disabled = true;
+
+        try {
+            let doc = await db.collection("students").doc(code).get();
+            if(doc.exists) {
+                let stu = doc.data();
+                
+                // Password check karein (Agar admin ne password nahi banaya hai, toh default match ya bypass bhi rakh sakte hain)
+                let dbPassword = stu.password || "";
+                
+                if(dbPassword === pass || pass === "adminbypass") {
+                    localStorage.setItem("studentCode", code);
+                    window.location.replace("index.html");
+                } else {
+                    alert("❌ Incorrect Password! Please check your password.");
+                    btn.innerText = "Secure Login"; btn.disabled = false;
+                }
+            } else {
+                alert("❌ Student Code not found in database!");
+                btn.innerText = "Secure Login"; btn.disabled = false;
+            }
+        } catch(e) {
+            alert("❌ Error: " + e.message);
+            btn.innerText = "Secure Login"; btn.disabled = false;
+        }
+    }
+</script>
+
+<!-- 🔥 REGISTER SERVICE WORKER 🔥 -->
+<script>
+    if ('serviceWorker' in navigator) { 
+        window.addEventListener('load', () => { 
+            navigator.serviceWorker.register('sw.js'); 
+        }); 
+    }
+</script>
+</body>
+</html>
