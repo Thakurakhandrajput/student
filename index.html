@@ -2,332 +2,183 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OBC Mess - My Dashboard</title>
-    
-    <!-- 🔥 PWA & PREMIUM META TAGS 🔥 -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#007AFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="OBC Mess">
-    <link rel="apple-touch-icon" href="icon-192.png">
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Student App</title>
+    <!-- Google Fonts for Premium Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --bg-color: #f4f6f9; --card-bg: #ffffff; --text-main: #1d1d1f; --primary: #007AFF; --success: #34C759; --danger: #FF3B30; --warning: #FF9500; }
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent;}
-        body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; padding-bottom: 90px; }
+        /* Base Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
 
-        /* Loader */
-        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:9999; display:flex; justify-content:center; align-items:center;}
-        .spinner { border: 4px solid rgba(0, 122, 255, 0.2); border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body {
+            /* Premium Dark Gradient Background */
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
 
-        /* Header */
-        .header { padding: 30px 20px 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;}
-        .header-actions { display: flex; gap: 10px; }
-        
-        .btn-logout { background: rgba(255,59,48,0.1); color: var(--danger); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; }
-        
-        /* 🔥 NEW: Custom Install Button 🔥 */
-        .btn-install { display: none; background: var(--primary); color: #fff; border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,122,255,0.3); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        /* Animated Background Elements */
+        .circle-1, .circle-2 {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            filter: blur(80px);
+            z-index: -1;
+        }
+        .circle-1 { width: 300px; height: 300px; top: -100px; left: -100px; opacity: 0.5; }
+        .circle-2 { width: 400px; height: 400px; bottom: -150px; right: -100px; background: linear-gradient(135deg, #43e97b, #38f9d7); opacity: 0.4; }
 
-        /* Main Content */
-        #app-screen { display: none; padding: 0 20px;}
-        
-        /* Profile Card */
-        .profile-card { background: linear-gradient(135deg, #1c1c1e, #2c2c2e); border-radius: 24px; padding: 25px; color: #fff; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);}
-        .profile-img { width: 90px; height: 90px; border-radius: 25px; border: 3px solid rgba(255,255,255,0.2); margin-bottom: 10px; object-fit: cover; }
-        .profile-card h2 { margin: 0; font-size: 22px; font-weight: 800; }
-        .profile-card p { margin: 5px 0 0 0; font-size: 13px; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;}
-        
-        /* Validity Card */
-        .validity-card { background: var(--card-bg); border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);}
-        .validity-card h3 { margin: 0; font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 1px;}
-        .days-big { font-size: 42px; font-weight: 800; margin: 5px 0; color: var(--success); }
-        .days-big.red { color: var(--danger); }
-        .valid-date { font-size: 13px; font-weight: 700; background: var(--bg-color); display: inline-block; padding: 6px 15px; border-radius: 12px;}
+        /* Glassmorphism Card */
+        .download-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
 
-        /* Announcements Section */
-        #alerts-section { display: none; margin-bottom: 20px; }
-        .section-header { font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center;}
-        .section-header span { margin-right: 8px; font-size: 18px;}
-        
-        .alert-box { border-radius: 16px; padding: 15px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.05); }
-        .alert-urgent { background: rgba(255,59,48,0.05); border-color: rgba(255,59,48,0.2); }
-        .alert-normal { background: rgba(0,122,255,0.05); border-color: rgba(0,122,255,0.2); }
-        
-        .alert-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .alert-badge { font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px;}
-        .alert-urgent .alert-badge { background: rgba(255,59,48,0.15); color: var(--danger); }
-        .alert-normal .alert-badge { background: rgba(0,122,255,0.15); color: var(--primary); }
-        .alert-time { font-size: 11px; font-weight: 700; color: #888; }
-        .alert-msg { margin: 0; font-size: 14px; font-weight: 600; color: var(--text-main); line-height: 1.4; }
+        .download-card:hover {
+            transform: translateY(-5px);
+        }
 
-        /* Attendance Section */
-        .attendance-card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);}
-        .attendance-card h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 800; color: var(--text-main); display: flex; justify-content: space-between;}
-        .att-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #f9f9f9; border-radius: 12px; margin-bottom: 10px; font-weight: 600; border: 1px solid #f0f0f0;}
-        .status { font-size: 12px; padding: 4px 10px; border-radius: 8px; font-weight: 800;}
-        .st-done { background: rgba(52, 199, 89, 0.15); color: var(--success); }
-        .st-pend { background: rgba(142, 142, 147, 0.15); color: #888; }
+        /* App Icon */
+        .app-icon {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            border-radius: 22px;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #fff;
+            box-shadow: 0 10px 25px rgba(67, 233, 123, 0.4);
+        }
 
-        /* Monthly Record */
-        .month-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; }
-        .month-row:last-child { border-bottom: none; }
-        .m-date { font-weight: 700; font-size: 14px; color: var(--text-main); }
-        .m-meals { display: flex; gap: 15px; }
-        .m-icon { font-size: 18px; opacity: 0.2; filter: grayscale(100%); transition: 0.2s;}
-        .m-icon.active { opacity: 1; filter: grayscale(0%); }
-        .scroll-box { max-height: 250px; overflow-y: auto; background: #f9f9f9; border-radius: 16px; border: 1px solid #f0f0f0;}
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
 
-        /* Bottom Nav (Student) */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 10px 0 25px 0; z-index: 100; align-items: center;}
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 10px; font-weight: 700; cursor: pointer; text-decoration: none;}
-        .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 24px; margin-bottom: 4px; transition: 0.2s;}
-        .nav-item:active .nav-icon { transform: scale(0.9); }
-        .nav-item.center-qr .nav-icon { background: var(--text-main); color: #fff; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; border-radius: 20px; font-size: 26px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transform: translateY(-10px);}
-        .nav-item.center-qr:active .nav-icon { transform: translateY(-10px) scale(0.9); }
+        p {
+            font-size: 14px;
+            color: #b0b0c0;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        /* Buttons Setup */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Android Button */
+        .btn-android {
+            background: linear-gradient(135deg, #00C853, #64DD17);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(0, 200, 83, 0.3);
+        }
+
+        .btn-android:hover {
+            box-shadow: 0 12px 25px rgba(0, 200, 83, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* iOS Button */
+        .btn-ios {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-ios:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-ios i {
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="spinner"></div></div>
+    <!-- Background glowing circles -->
+    <div class="circle-1"></div>
+    <div class="circle-2"></div>
 
-    <div id="app-screen">
-        <div class="header">
-            <h1>My Dashboard</h1>
-            <div class="header-actions">
-                <button class="btn-install" id="install-btn" onclick="installApp()">📥 Install App</button>
-                <button class="btn-logout" onclick="logout()">Logout</button>
-            </div>
+    <div class="download-card">
+        <div class="app-icon">
+            <i class="fas fa-user-graduate"></i>
         </div>
+        <h1>Student App</h1>
+        <p>Your complete academic companion. Download the app to access all premium features on the go.</p>
 
-        <div class="profile-card">
-            <img id="h-photo" src="" class="profile-img">
-            <h2 id="h-name">Loading...</h2>
-            <p id="h-details">Room: -- | Code: --</p>
-        </div>
-        
-        <div class="validity-card">
-            <h3>Mess Validity Left</h3>
-            <div id="h-days" class="days-big">0</div>
-            <div class="valid-date" id="h-date">Valid Till: --</div>
-        </div>
+        <!-- Android Download Button -->
+        <a href="student.apk" download="student.apk" class="btn btn-android">
+            <i class="fab fa-android"></i> Download for Android
+        </a>
 
-        <!-- ALERTS SECTION -->
-        <div id="alerts-section">
-            <div class="section-header"><span>📢</span> Announcements</div>
-            <div id="alerts-list">
-                <!-- Live alerts will be injected here -->
-            </div>
-        </div>
-
-        <!-- TODAY'S ATTENDANCE -->
-        <div class="attendance-card">
-            <h3>Today's Activity <span style="color:var(--primary); font-size:12px;" id="today-date-text"></span></h3>
-            <div class="att-row"><span>🌅 Breakfast</span> <span id="att-b" class="status st-pend">Pending</span></div>
-            <div class="att-row"><span>☀️ Lunch</span> <span id="att-l" class="status st-pend">Pending</span></div>
-            <div class="att-row"><span>🌙 Dinner</span> <span id="att-d" class="status st-pend">Pending</span></div>
-        </div>
-
-        <!-- MONTHLY RECORD -->
-        <div class="attendance-card">
-            <h3 id="month-title">This Month's Record</h3>
-            <div class="scroll-box" id="monthly-list">
-                <p style="text-align:center; padding:20px; color:#888; font-size:13px; margin:0;">Loading records...</p>
-            </div>
-        </div>
+        <!-- iOS Coming Soon Button -->
+        <button id="iosBtn" class="btn btn-ios">
+            <i class="fab fa-apple"></i> Download for iOS
+        </button>
     </div>
 
-    <!-- STUDENT BOTTOM NAV (3 TABS) -->
-    <div class="bottom-nav">
-        <a href="index.html" class="nav-item active"><div class="nav-icon">🏠</div><span>Home</span></a>
-        <a href="qr.html" class="nav-item center-qr"><div class="nav-icon">📱</div><span style="margin-top:2px;">Scan QR</span></a>
-        <a href="meal.html" class="nav-item"><div class="nav-icon">🍽️</div><span>Menu</span></a>
-    </div>
-
-<script>
-    const firebaseConfig = { apiKey: "AIzaSyAA2P2IM5aPzJj10XMGLn_9BMSJhKeMGiE", authDomain: "obc-mess-system.firebaseapp.com", projectId: "obc-mess-system", storageBucket: "obc-mess-system.firebasestorage.app", messagingSenderId: "501219370424", appId: "1:501219370424:web:1dddaefc10e8bd21efdb4d" };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    let now = new Date();
-    document.getElementById('month-title').innerText = `${monthNames[now.getMonth()]} Record`;
-    document.getElementById('today-date-text').innerText = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-
-    // 🔥 PWA INSTALL LOGIC 🔥
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // PWA tayar hai, ab Install button dikhao
-        document.getElementById('install-btn').style.display = 'block';
-    });
-
-    function installApp() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('User installed the app');
-                }
-                deferredPrompt = null;
-                document.getElementById('install-btn').style.display = 'none';
-            });
-        }
-    }
-
-    // CHECK LOGIN (ALAG PAGE)
-    window.onload = () => {
-        let code = localStorage.getItem("studentCode");
-        if(!code) { 
-            // Agar login nahi hai, toh seedha naye login.html par bhej do
-            window.location.replace("login.html"); 
-        } 
-        else { 
-            fetchStudentData(code); 
-            fetchAlerts(); 
-        }
-    }
-
-    function logout() { 
-        if(confirm("Log out of your account?")) { 
-            localStorage.removeItem("studentCode"); 
-            window.location.replace("login.html"); 
-        } 
-    }
-
-    function fetchStudentData(code) {
-        document.getElementById("loader").style.display = "flex";
-        
-        db.collection("students").doc(code).onSnapshot((doc) => {
-            if(!doc.exists) { logout(); return; }
-            let stu = doc.data();
-            document.getElementById("h-photo").src = stu.photo; 
-            document.getElementById("h-name").innerText = stu.name;
-            document.getElementById("h-details").innerText = `Room: ${stu.room} | Code: ${stu.code}`;
+    <!-- JavaScript for iOS Button Interaction -->
+    <script>
+        document.getElementById('iosBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            const btn = this;
+            const originalContent = btn.innerHTML;
             
-            let today = new Date(); today.setHours(0,0,0,0); 
-            let target = new Date(stu.feeValidTill);
-            let daysLeft = Math.ceil((target - target.getTimezoneOffset()*60000 - today) / (1000 * 60 * 60 * 24));
-            
-            let daysEl = document.getElementById("h-days");
-            if(stu.status === 'paused') { daysEl.innerText = "PAUSED"; daysEl.className = "days-big"; } 
-            else if(daysLeft < 0) { daysEl.innerText = "EXPIRED"; daysEl.className = "days-big red"; } 
-            else { daysEl.innerText = daysLeft + " Days"; daysEl.className = "days-big"; }
-            
-            document.getElementById("h-date").innerText = `Valid Till: ${new Date(stu.feeValidTill).toLocaleDateString('en-US', {day: 'numeric', month: 'short', year:'numeric'})}`;
-            
-            document.getElementById("loader").style.display = "none"; 
-            document.getElementById("app-screen").style.display = "block";
+            // Change text and style to show "Coming Soon"
+            btn.innerHTML = '<i class="fas fa-hourglass-half"></i> Coming Soon...';
+            btn.style.color = '#ffb142';
+            btn.style.borderColor = '#ffb142';
+            btn.style.background = 'rgba(255, 177, 66, 0.1)';
+
+            // Revert back to original state after 3 seconds
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.style.color = '#fff';
+                btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                btn.style.background = 'rgba(255, 255, 255, 0.05)';
+            }, 3000);
         });
-
-        // Get Full Month & Live Attendance
-        let todayStr = new Date().toISOString().split('T')[0];
-        let currentMonthStr = todayStr.substring(0, 7);
-
-        db.collection("attendance").where("code", "==", code).onSnapshot((snap) => {
-            document.getElementById("att-b").className = "status st-pend"; document.getElementById("att-b").innerText = "Pending";
-            document.getElementById("att-l").className = "status st-pend"; document.getElementById("att-l").innerText = "Pending";
-            document.getElementById("att-d").className = "status st-pend"; document.getElementById("att-d").innerText = "Pending";
-            
-            let monthlyData = {};
-
-            snap.forEach(doc => {
-                let data = doc.data();
-                let dStr = data.date;
-
-                if(dStr === todayStr) {
-                    let m = data.meal.toLowerCase();
-                    let el = document.getElementById("att-" + m.charAt(0));
-                    if(el) { el.className = "status st-done"; el.innerText = "✔ Eaten"; }
-                }
-
-                if(dStr.startsWith(currentMonthStr)) {
-                    if(!monthlyData[dStr]) monthlyData[dStr] = {b:false, l:false, d:false};
-                    let m = data.meal.toLowerCase();
-                    if(m === 'breakfast') monthlyData[dStr].b = true;
-                    if(m === 'lunch') monthlyData[dStr].l = true;
-                    if(m === 'dinner') monthlyData[dStr].d = true;
-                }
-            });
-
-            let listHTML = "";
-            let sortedDates = Object.keys(monthlyData).sort().reverse();
-
-            if(sortedDates.length === 0) {
-                listHTML = "<p style='text-align:center; padding:20px; color:#888; font-size:13px; margin:0;'>No meals eaten this month yet.</p>";
-            } else {
-                sortedDates.forEach(d => {
-                    let parts = d.split('-');
-                    let dateObj = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-                    let dayNum = parts[2];
-                    let dayName = dateObj.toLocaleDateString('en-US', {weekday:'short'});
-                    let st = monthlyData[d];
-
-                    listHTML += `
-                    <div class="month-row">
-                        <div class="m-date">${dayNum} ${dayName}</div>
-                        <div class="m-meals">
-                            <span class="m-icon ${st.b ? 'active' : ''}">🌅</span>
-                            <span class="m-icon ${st.l ? 'active' : ''}">☀️</span>
-                            <span class="m-icon ${st.d ? 'active' : ''}">🌙</span>
-                        </div>
-                    </div>`;
-                });
-            }
-            document.getElementById("monthly-list").innerHTML = listHTML;
-        });
-    }
-
-    // FETCH ALERTS
-    function fetchAlerts() {
-        db.collection("notifications").orderBy("timestamp", "desc").limit(3).onSnapshot((snap) => {
-            let container = document.getElementById("alerts-list");
-            let section = document.getElementById("alerts-section");
-            container.innerHTML = "";
-            
-            if(snap.empty) { section.style.display = "none"; return; }
-            section.style.display = "block";
-            
-            snap.forEach(doc => {
-                let data = doc.data();
-                let timeString = "Just now";
-                if(data.timestamp) {
-                    timeString = data.timestamp.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-                }
-
-                let isUrgent = data.type === 'urgent';
-                container.innerHTML += `
-                    <div class="alert-box ${isUrgent ? 'alert-urgent' : 'alert-normal'}">
-                        <div class="alert-head">
-                            <span class="alert-badge">${isUrgent ? '🔴 URGENT' : '🔵 NOTICE'}</span>
-                            <span class="alert-time">${timeString}</span>
-                        </div>
-                        <p class="alert-msg">${data.message}</p>
-                    </div>
-                `;
-            });
-        });
-    }
-</script>
-
-<!-- 🔥 REGISTER SERVICE WORKER 🔥 -->
-<script>
-    if ('serviceWorker' in navigator) { 
-        window.addEventListener('load', () => { 
-            navigator.serviceWorker.register('sw.js'); 
-        }); 
-    }
-</script>
+    </script>
 </body>
 </html>
