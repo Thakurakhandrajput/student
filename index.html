@@ -6,7 +6,7 @@
     <title>Download Student App</title>
     <!-- Plus Jakarta Sans - Premium Modern Font -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
+    <!-- FontAwesome for Icons (Kept for buttons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -81,7 +81,7 @@
             50% { transform: translateY(-8px); }
         }
 
-        /* App Icon */
+        /* Image Logo Setup */
         .app-icon {
             width: 75px;
             height: 75px;
@@ -92,8 +92,14 @@
             justify-content: center;
             margin: 0 auto 18px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
-            font-size: 32px;
-            color: #2563eb;
+            overflow: hidden; /* Keeps the image inside the rounded corners */
+            padding: 5px; /* Adds a small breathing room inside the white box */
+        }
+
+        .app-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Ensures the logo doesn't stretch or crop */
         }
 
         h1 {
@@ -117,18 +123,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px; /* Icon aur text ke beech ka gap thoda kam kiya */
+            gap: 8px;
             width: 100%;
-            max-width: 300px; /* Limit button width so it doesn't stretch too much */
-            padding: 13px 20px; /* Height thodi kam ki (sleek look) */
+            max-width: 300px;
+            padding: 13px 20px;
             border-radius: 14px;
-            font-size: 15px; /* Font size thoda perfect kiya */
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             border: none;
             text-decoration: none;
             transition: all 0.2s ease;
-            margin: 0 auto 12px auto; /* Perfectly center align karne ke liye */
+            margin: 0 auto 12px auto;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -166,8 +172,10 @@
 
     <!-- Centered Card -->
     <div class="card">
+        
+        <!-- Updated: Image Logo inserted here -->
         <div class="app-icon">
-            <i class="fa-solid fa-graduation-cap"></i>
+            <img src="logo.png" alt="Student App Logo">
         </div>
         
         <h1>Student App</h1>
