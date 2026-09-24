@@ -11,15 +11,19 @@
     
     <style>
         /* Strict Reset & Scroll Lock */
-        html, body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
             width: 100%;
             height: 100%;
-            height: 100dvh; /* Adapts perfectly to mobile screens */
-            overflow: hidden; /* Hides any scrollbar */
-            position: fixed; /* Completely locks the page in place */
-            overscroll-behavior: none; /* Stops pull-to-refresh & bounce effects */
+            height: 100dvh;
+            overflow: hidden; 
+            position: fixed; 
+            overscroll-behavior: none; 
             touch-action: pan-x pan-y;
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
@@ -38,7 +42,7 @@
             z-index: 1;
             opacity: 0.5;
             border-radius: 50%;
-            pointer-events: none; /* Prevents touch interactions on background */
+            pointer-events: none;
         }
         
         .blob-1 {
@@ -60,14 +64,16 @@
             -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(255, 255, 255, 0.9);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-            border-radius: 32px;
-            padding: 40px;
+            border-radius: 28px;
+            padding: 35px 30px;
             width: 90%;
-            max-width: 400px;
+            max-width: 380px;
             text-align: center;
             z-index: 10;
-            /* Gentle floating animation */
             animation: float 6s ease-in-out infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         @keyframes float {
@@ -77,21 +83,21 @@
 
         /* App Icon */
         .app-icon {
-            width: 80px;
-            height: 80px;
+            width: 75px;
+            height: 75px;
             background: #ffffff;
-            border-radius: 22px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
+            margin: 0 auto 18px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
-            font-size: 34px;
+            font-size: 32px;
             color: #2563eb;
         }
 
         h1 {
-            font-size: 26px;
+            font-size: 24px;
             color: #0f172a;
             margin-bottom: 8px;
             font-weight: 700;
@@ -100,27 +106,29 @@
 
         p {
             color: #64748b;
-            font-size: 15px;
-            margin-bottom: 32px;
+            font-size: 14px;
+            margin-bottom: 28px;
             line-height: 1.5;
+            padding: 0 10px;
         }
 
-        /* Buttons */
+        /* Buttons Fix: Centered & Sleeker */
         .btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px; /* Icon aur text ke beech ka gap thoda kam kiya */
             width: 100%;
-            padding: 16px;
-            border-radius: 16px;
-            font-size: 16px;
+            max-width: 300px; /* Limit button width so it doesn't stretch too much */
+            padding: 13px 20px; /* Height thodi kam ki (sleek look) */
+            border-radius: 14px;
+            font-size: 15px; /* Font size thoda perfect kiya */
             font-weight: 600;
             cursor: pointer;
             border: none;
             text-decoration: none;
             transition: all 0.2s ease;
-            margin-bottom: 14px;
+            margin: 0 auto 12px auto; /* Perfectly center align karne ke liye */
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -128,7 +136,7 @@
         .btn-android {
             background: #10b981;
             color: #ffffff;
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.2);
         }
 
         .btn-android:hover, .btn-android:active {
@@ -182,12 +190,12 @@
             e.preventDefault();
             const btn = this;
             
-            if (btn.classList.contains('waiting')) return; // Prevent multiple clicks
+            if (btn.classList.contains('waiting')) return;
             
             const originalHtml = btn.innerHTML;
             btn.classList.add('waiting');
             
-            // Change to Warning/Coming Soon state
+            // Warning/Coming Soon state
             btn.innerHTML = '<i class="fa-solid fa-clock"></i> Coming Soon...';
             btn.style.background = '#fef3c7';
             btn.style.color = '#d97706';
