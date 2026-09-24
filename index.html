@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Download Student App</title>
     <!-- Plus Jakarta Sans - Premium Modern Font -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -10,45 +10,47 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Base Setup - No Scrolling Allowed */
-        * {
+        /* Strict Reset & Scroll Lock */
+        html, body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            height: 100dvh; /* Adapts perfectly to mobile screens */
+            overflow: hidden; /* Hides any scrollbar */
+            position: fixed; /* Completely locks the page in place */
+            overscroll-behavior: none; /* Stops pull-to-refresh & bounce effects */
+            touch-action: pan-x pan-y;
             font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
         }
 
         body {
-            /* Light premium background */
-            background-color: #f8fafc;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden; /* Disables all scrolling */
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
-        /* Abstract soft background blurs for premium feel */
+        /* Abstract soft background blurs */
         .blur-blob {
             position: absolute;
             filter: blur(90px);
             z-index: 1;
             opacity: 0.5;
             border-radius: 50%;
+            pointer-events: none; /* Prevents touch interactions on background */
         }
         
         .blob-1 {
             top: -10%; left: -10%;
             width: 40vw; height: 40vw;
-            background: #93c5fd; /* Soft Blue */
+            background: #93c5fd; 
         }
         
         .blob-2 {
             bottom: -15%; right: -10%;
             width: 45vw; height: 45vw;
-            background: #c4b5fd; /* Soft Purple */
+            background: #c4b5fd; 
         }
 
         /* Center Glassmorphism Card */
@@ -85,12 +87,12 @@
             margin: 0 auto 20px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
             font-size: 34px;
-            color: #2563eb; /* Primary Blue */
+            color: #2563eb;
         }
 
         h1 {
             font-size: 26px;
-            color: #0f172a; /* Very dark slate */
+            color: #0f172a;
             margin-bottom: 8px;
             font-weight: 700;
             letter-spacing: -0.5px;
@@ -119,31 +121,32 @@
             text-decoration: none;
             transition: all 0.2s ease;
             margin-bottom: 14px;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Android Button (Vibrant Green) */
+        /* Android Button */
         .btn-android {
             background: #10b981;
             color: #ffffff;
             box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
         }
 
-        .btn-android:hover {
+        .btn-android:hover, .btn-android:active {
             background: #059669;
-            transform: scale(1.02);
+            transform: scale(0.98);
         }
 
-        /* iOS Button (Subtle Outline) */
+        /* iOS Button */
         .btn-ios {
             background: #f1f5f9;
             color: #475569;
             border: 1px solid #e2e8f0;
         }
 
-        .btn-ios:hover {
+        .btn-ios:hover, .btn-ios:active {
             background: #e2e8f0;
             color: #0f172a;
-            transform: scale(1.02);
+            transform: scale(0.98);
         }
     </style>
 </head>
@@ -153,7 +156,7 @@
     <div class="blur-blob blob-1"></div>
     <div class="blur-blob blob-2"></div>
 
-    <!-- Centered Card (No scrolling needed) -->
+    <!-- Centered Card -->
     <div class="card">
         <div class="app-icon">
             <i class="fa-solid fa-graduation-cap"></i>
@@ -179,13 +182,15 @@
             e.preventDefault();
             const btn = this;
             
-            // Save original text
+            if (btn.classList.contains('waiting')) return; // Prevent multiple clicks
+            
             const originalHtml = btn.innerHTML;
+            btn.classList.add('waiting');
             
             // Change to Warning/Coming Soon state
             btn.innerHTML = '<i class="fa-solid fa-clock"></i> Coming Soon...';
-            btn.style.background = '#fef3c7'; /* Light yellow */
-            btn.style.color = '#d97706';      /* Dark yellow/orange text */
+            btn.style.background = '#fef3c7';
+            btn.style.color = '#d97706';
             btn.style.borderColor = '#fde68a';
             
             // Revert after 3 seconds
@@ -194,6 +199,7 @@
                 btn.style.background = '';
                 btn.style.color = '';
                 btn.style.borderColor = '';
+                btn.classList.remove('waiting');
             }, 3000);
         });
     </script>
